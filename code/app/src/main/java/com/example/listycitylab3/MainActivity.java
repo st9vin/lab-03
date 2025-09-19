@@ -1,36 +1,44 @@
 package com.example.listycitylab3;
 
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EditFragment.EditCityListener {
 
-    private ArrayList<String> dataList;
+    private ArrayList<City> cities;
     private ListView cityList;
-    private ArrayAdapter<String> cityAdapter;
+    private CityAdapter cityAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] cities = {
-                "Edmonton", "Vancouver", "Moscow",
-                "Sydney", "Berlin", "Vienna",
-                "Tokyo", "Beijing", "Osaka", "New Delhi"
-        };
+        cities = new ArrayList<>();
+        cities.add(new City("Edmonton", "AB"));
+        cities.add(new City("Vancouver", "BC"));
+        cities.add(new City("Toronto", "ON"));
+        cities.add(new City("Calgary", "AB"));
 
-        dataList = new ArrayList<>();
-        dataList.addAll(Arrays.asList(cities));
-        
         cityList = findViewById(R.id.city_list);
-        cityAdapter = new ArrayAdapter<>(this, R.layout.content, dataList);
+        cityAdapter = new CityAdapter(this, cities);
         cityList.setAdapter(cityAdapter);
+
+        // Open edit fragment when city clicked
+        cityList.setOnItemClickListener((parent, view, position, id) -> {
+            City clicked = cities.get(position);
+            EditFragment frag = EditFragment.newInstance(clicked, position);
+            frag.show(getSupportFragmentManager(), "edit_dialog");
+        });
+    }
+
+    @Override
+    public void onCityEdited(City editedCity, int position) {
+        cities.set(position, editedCity);
+        cityAdapter.notifyDataSetChanged();
     }
 }
